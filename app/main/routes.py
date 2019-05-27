@@ -25,7 +25,7 @@ def index():
 @bp.route("/api/send")
 def send():
     if request.args.get("api_key") != current_app.config["API_KEY"]:
-        return abort("Invalid API KEY!")
+        abort(403)
     else:
         if "timestamp" in request.args:
             timestamp = dateutil.parser.parse(request.args["timestamp"])
@@ -35,12 +35,13 @@ def send():
             if key.endswith("_reading"):
                 sensor = key[: -len("_reading")]
                 tokens = value.split(":", 1)
-                msg = {"sensor": sensor, "value": float(tokens[0]), "timestamp": timestamp}
+                msg = {"sensor": sensor, "value": float(tokens[0])}
+                if timestamp:
+                    msg["timestamp"] = timestamp
                 if len(tokens) > 1:
                     msg["unit"] = tokens[1]
                 msg = json.loads(json.dumps(msg, cls=DateTimeEncoder))
                 r = SensorReading(device_id=request.args["device_id"], msg=msg)
-                print("STORING", msg)
                 db.session.add(r)
         db.session.commit()
         return "OK"
