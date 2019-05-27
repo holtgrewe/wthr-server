@@ -8,6 +8,5 @@ This is a web server based on Flask and Plotly Dash for
 ## Running
 
 ```
-export FLASK_APP=wthr.py
 flask run
 ```
